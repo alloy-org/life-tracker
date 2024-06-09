@@ -35,7 +35,9 @@
         await app.insertNoteContent(note, `# ${sectionName}
 `);
       }
-      let tableMarkdown = `| **Date** | **Mood** | **Precipitating events** |
+      let tableMarkdown = `# ${sectionName}
+`;
+      tableMarkdown += `| **Date** | **Mood** | **Precipitating events** |
 | --- | --- | --- |
 `;
       tableMarkdown += `| ${(/* @__PURE__ */ new Date()).toISOString()} | ${result[0]} | ${result[1]} |
