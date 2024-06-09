@@ -22,24 +22,26 @@
     },
     // --------------------------------------------------------------------------------------
     _persistData: async function(app, note, sectionName, result) {
-      const content = await app.getNoteSections(note);
+      const content = await app.getNoteContent(note);
       let existingTable = "";
       if (content.includes(`# ${sectionName}`)) {
         existingTable = await this._sectionContent(content, sectionName);
         if (existingTable?.length) {
-          existingTable = existingTable.split("\n").slice(2).join("\n");
+          const tableData = existingTable.split("\n").slice(2).join("\n");
+          console.log("Got table data", tableData, "from", existingTable);
+          existingTable = tableData;
         }
       } else {
-        await note.insertContent(`# ${sectionName}
+        await app.insertNoteContent(note, `# ${sectionName}
 `);
       }
-      let tableMarkdown = `| Date | Mood | Precipitating events |
+      let tableMarkdown = `| **Date** | **Mood** | **Precipitating events** |
 | --- | --- | --- |
 `;
-      tableMarkDown += `| ${(/* @__PURE__ */ new Date()).toISOString()} | ${result[0]} | ${result[1]} |
+      tableMarkdown += `| ${(/* @__PURE__ */ new Date()).toISOString()} | ${result[0]} | ${result[1]} |
 `;
       tableMarkdown += existingTable;
-      await note.replaceNoteContent(tableMarkdown, { heading: { text: sectionName, level: 2 } });
+      await app.replaceNoteContent(note, tableMarkdown, { heading: { text: sectionName, level: 2 } });
     },
     // --------------------------------------------------------------------------------------
     _fetchData: async function(app, noteDataName) {
@@ -83,7 +85,7 @@
           throw new Error(`${err.message} (line 1054)`);
         }
       }
-      const { startIndex, endIndex } = _sectionRange(noteContent, sectionHeadingText);
+      const { startIndex, endIndex } = this._sectionRange(noteContent, sectionHeadingText);
       return noteContent.slice(startIndex, endIndex);
     },
     // --------------------------------------------------------------------------------------
