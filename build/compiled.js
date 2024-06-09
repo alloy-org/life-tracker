@@ -34,8 +34,7 @@
               break;
             }
           }
-          console.log("Got table data", tableData, "from", existingTable);
-          existingTable = tableData;
+          existingTable = tableRows.join("\n");
         }
       } else {
         await app.insertNoteContent(note, `# ${sectionName}
