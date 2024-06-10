@@ -2,12 +2,17 @@
   "version": "2.0.0",
   "tasks": [
     {
-      "label": "build",
-      "type": "shell",
+      "args": [
+        "run",
+        "build",
+        "--experimental-vm-modules"
+      ],
+      "command": "npm",
       "group": {
         "kind": "build",
         "isDefault": true
       },
+      "label": "build",
       "presentation": {
         "echo": true,
         "reveal": "always",
@@ -15,8 +20,15 @@
         "panel": "dedicated"
       },
       "problemMatcher": [],
-      "command": "npm",
-      "args": ["run", "build", "--experimental-vm-modules" ]
+      "type": "shell"
+    },
+    {
+      "detail": "jest --env=jsdom --experimental-vm-modules",
+      "group": "test",
+      "label": "npm: test",
+      "problemMatcher": [],
+      "script": "test",
+      "type": "npm"
     }
   ]
 }
