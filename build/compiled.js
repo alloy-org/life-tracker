@@ -5,6 +5,7 @@
     constants: {
       DEFAULT_NOTE_DATA_NAME: "LifeTracker Data",
       DEFAULT_NOTE_DATA_TAGS: ["data"],
+      MOOD_SECTION_NAME: "Mood level",
       NOTE_DATA_SETTING_KEY: "Note Data Name"
     },
     // --------------------------------------------------------------------------------------
@@ -17,7 +18,11 @@
           const note = await this._fetchDataNote(app);
           if (!note)
             return false;
-          return true;
+          const tableMarkdown = this._tableData(app, note, this.constants.MOOD_SECTION_NAME);
+          if (!tableMarkdown)
+            return false;
+          const todayString = (/* @__PURE__ */ new Date()).toLocaleDateString();
+          return !tableMarkdown.includes(todayString);
         }
       }
     },
@@ -36,10 +41,29 @@
         { label: "What happened in the time leading up to this rating?", type: "text" }
       ] });
       const lifeDataNote = await this._fetchDataNote(app, { noteDataName });
-      await this._persistData(app, lifeDataNote, "Mood level", result);
+      await this._persistData(app, lifeDataNote, this.constants.MOOD_SECTION_NAME, result);
     },
     // --------------------------------------------------------------------------------------
     _persistData: async function(app, note, sectionName, result) {
+      let existingTable = this._tableData(app, note, sectionName);
+      if (!existingTable) {
+        await app.insertNoteContent(note, `# ${sectionName}
+`);
+        existingTable = "";
+      }
+      ;
+      let tableMarkdown = `# ${sectionName}
+`;
+      tableMarkdown += `| **Date** | **Mood** | **Precipitating events** |
+| --- | --- | --- |
+`;
+      tableMarkdown += `| ${(/* @__PURE__ */ new Date()).toLocaleString()} | ${result[0]} | ${result[1]} |
+`;
+      tableMarkdown += existingTable;
+      await app.replaceNoteContent(note, tableMarkdown, { heading: { text: sectionName, level: 2 } });
+    },
+    // --------------------------------------------------------------------------------------
+    async _tableData(app, note, sectionName) {
       const content = await app.getNoteContent(note);
       let existingTable = "";
       if (content.includes(`# ${sectionName}`)) {
@@ -52,21 +76,9 @@
               break;
             }
           }
-          existingTable = tableRows.join("\n");
+          return tableRows.join("\n");
         }
-      } else {
-        await app.insertNoteContent(note, `# ${sectionName}
-`);
       }
-      let tableMarkdown = `# ${sectionName}
-`;
-      tableMarkdown += `| **Date** | **Mood** | **Precipitating events** |
-| --- | --- | --- |
-`;
-      tableMarkdown += `| ${(/* @__PURE__ */ new Date()).toISOString()} | ${result[0]} | ${result[1]} |
-`;
-      tableMarkdown += existingTable;
-      await app.replaceNoteContent(note, tableMarkdown, { heading: { text: sectionName, level: 2 } });
     },
     // --------------------------------------------------------------------------------------
     _fetchDataNote: async function(app, { noteDataName = null } = {}) {
