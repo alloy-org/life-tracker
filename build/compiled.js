@@ -18,7 +18,7 @@
           const note = await this._fetchDataNote(app);
           if (!note)
             return false;
-          const tableMarkdown = this._tableData(app, note, this.constants.MOOD_SECTION_NAME);
+          const tableMarkdown = await this._tableData(app, note, this.constants.MOOD_SECTION_NAME);
           if (!tableMarkdown)
             return false;
           const todayString = (/* @__PURE__ */ new Date()).toLocaleDateString();
@@ -45,7 +45,7 @@
     },
     // --------------------------------------------------------------------------------------
     _persistData: async function(app, note, sectionName, result) {
-      let existingTable = this._tableData(app, note, sectionName);
+      let existingTable = await this._tableData(app, note, sectionName);
       if (!existingTable) {
         await app.insertNoteContent(note, `# ${sectionName}
 `);
